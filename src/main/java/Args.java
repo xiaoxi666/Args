@@ -6,7 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 public class Args {
-    private  Map<String, Class> typeParserMap =
+    private static final String COLON = ":";
+    private static final String SPACE = " ";
+    private static final String DASH = "-";
+
+    private static final Map<String, Class> TYPE_PARSER_MAP =
         new ImmutableMap.Builder<String, Class>()
              .put("boolean", BooleanArgsParser.class)
              .put("int", IntegerArgsParser.class)
@@ -21,11 +25,11 @@ public class Args {
     }
 
     private void parseSchema(String schema) throws ArgsException {
-        List<String> schemaRules = Arrays.asList(schema.split(" "));
+        List<String> schemaRules = Arrays.asList(schema.split(SPACE));
         schemaRules.stream().forEach(sr -> {
-            String[] schemaRule = sr.split(":");
+            String[] schemaRule = sr.split(COLON);
             try {
-                flagParserMap.put(schemaRule[0], (ArgsParser) typeParserMap.get(schemaRule[1]).newInstance());
+                flagParserMap.put(schemaRule[0], (ArgsParser) TYPE_PARSER_MAP.get(schemaRule[1]).newInstance());
             } catch (NullPointerException e) {
                 throw new ArgsException("Schema definition not support: Lack specified type.");
             } catch (InstantiationException | IllegalAccessException e) {
@@ -35,7 +39,7 @@ public class Args {
     }
 
     private void parseArgs(String args) {
-        List<String> flagArgs = Arrays.asList(args.split("-"));
+        List<String> flagArgs = Arrays.asList(args.split(DASH));
         flagArgs.stream()
             .filter(flagArg -> !flagArg.isEmpty())
             .map(flagArg -> flagArg.trim())
@@ -43,7 +47,16 @@ public class Args {
     }
 
     private void parseArg(String flagArg) {
-        flagParserMap.get(flagArg.split(" ")[0]).setValue(flagArg);
+        if (flagArg.isEmpty()) {
+            throw new ArgsException("Miss flag.");
+        }
+        String[] flagAndArg = flagArg.split(SPACE);
+        if (flagAndArg.length > 2) {
+            throw new ArgsException("Flag cannot have multi separate params.");
+        }
+        String flag = flagAndArg[0];
+        String arg = flagAndArg.length == 1 ? null : flagAndArg[1];
+        flagParserMap.get(flag).setValue(arg);
     }
 
     public <T> T get(String flag) {

@@ -2,14 +2,13 @@ public class IntegerArgsParser<T> implements ArgsParser {
     private Integer value = 0;
 
     @Override
-    public void setValue(String flagArg) throws ArgsException{
-        String[] flagAndArg = flagArg.split(" ");
-        try {
-            this.value = Integer.valueOf(flagAndArg[1]);
-        } catch (ArrayIndexOutOfBoundsException e) {
+    public void setValue(String arg) throws ArgsException{
+        if (arg == null) {
             throw new ArgsException("Flag for int type: Miss value.");
         }
-        catch (NumberFormatException e) {
+        try {
+            this.value = Integer.valueOf(arg);
+        } catch (NumberFormatException e) {
             throw new ArgsException("Flag for int type: Invalid value.");
         }
     }

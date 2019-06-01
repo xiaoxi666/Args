@@ -1,16 +1,12 @@
-import com.sun.org.apache.xpath.internal.operations.Bool;
-
 public class BooleanArgsParser implements ArgsParser {
     private Boolean value = false;
 
     @Override
-    public void setValue(String flagArg) throws ArgsException{
-        String[] flagAndArg = flagArg.split(" ");
-        if (flagAndArg.length == 1) {
-            this.value = true;
-        } else {
+    public void setValue(String arg) throws ArgsException{
+        if (arg != null) {
             throw new ArgsException("Flag for boolean type: Explicit assignment is prohibited.");
         }
+        this.value = true;
     }
 
     @Override

@@ -24,23 +24,23 @@ public class ArgsTest {
     }
 
     @Test
-    public void shouldReturnActualValue() {
-        Args args = new Args("l:boolean p:int d:String", "-l -p 8080 -d /usr/logs");
+    public void combinedCaseForFlagL() {
+        Args args = new Args("l:boolean p:int d:String", "-l");
         Assert.assertEquals(true, args.get("l"));
-        Assert.assertEquals(8080, (int)args.get("p"));
-        Assert.assertEquals("/usr/logs", args.get("d"));
+        Assert.assertEquals(0, (int)args.get("p"));
+        Assert.assertEquals("", args.get("d"));
     }
 
     @Test
-    public void combinedCase0() {
-        Args args = new Args("l:boolean p:int d:String", "-p 8080 -d /usr/logs");
+    public void combinedCaseForFlagP() {
+        Args args = new Args("l:boolean p:int d:String", "-p 8080");
         Assert.assertEquals(false, args.get("l"));
         Assert.assertEquals(8080, (int)args.get("p"));
-        Assert.assertEquals("/usr/logs", args.get("d"));
+        Assert.assertEquals("", args.get("d"));
     }
 
     @Test
-    public void combinedCase1() {
+    public void combinedCaseForFlagD() {
         Args args = new Args("l:boolean p:int d:String", "-d /usr/logs");
         Assert.assertEquals(false, args.get("l"));
         Assert.assertEquals(0, (int)args.get("p"));
@@ -48,10 +48,10 @@ public class ArgsTest {
     }
 
     @Test
-    public void combinedCase2() {
-        Args args = new Args("l:boolean p:int d:String", "-l -d /usr/logs");
+    public void shouldReturnActualValueForFlagLPD() {
+        Args args = new Args("l:boolean p:int d:String", "-l -p 8080 -d /usr/logs");
         Assert.assertEquals(true, args.get("l"));
-        Assert.assertEquals(0, (int)args.get("p"));
+        Assert.assertEquals(8080, (int)args.get("p"));
         Assert.assertEquals("/usr/logs", args.get("d"));
     }
 
@@ -83,4 +83,17 @@ public class ArgsTest {
         Args args = new Args("l:boolean p:int d:String", "-l -p 8080 -d");
     }
 
+    @Test
+    public void shouldThrowExceptionForMultiSeparateParams() {
+        thrown.expect(ArgsException.class);
+        thrown.expectMessage("Flag cannot have multi separate params.");
+        Args args = new Args("l:boolean p:int d:String", "-l -p 8080 80");
+    }
+
+    @Test
+    public void shouldThrowExceptionForMissFlag() {
+        thrown.expect(ArgsException.class);
+        thrown.expectMessage("Miss flag.");
+        Args args = new Args("l:boolean p:int d:String", "- -p 8080 80");
+    }
 }
