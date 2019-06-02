@@ -1,20 +1,26 @@
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 public class Args {
     private static final String COLON = ":";
     private static final String SPACE = " ";
     private static final String DASH = "-";
+    private static final String EMPTY = "";
 
+    // schame类型关联定义
     private static final Map<String, Class> TYPE_PARSER_MAP =
         new ImmutableMap.Builder<String, Class>()
              .put("boolean", BooleanArgsParser.class)
              .put("int", IntegerArgsParser.class)
              .put("String", StringArgsParser.class)
+             .put("[String]", StringListArgsParser.class)
+             .put("[int]", IntegerListArgsParser.class)
              .build();
 
     private Map<String, ArgsParser> flagParserMap = Maps.newHashMap();
@@ -39,11 +45,34 @@ public class Args {
     }
 
     private void parseArgs(String args) {
-        List<String> flagArgs = Arrays.asList(args.split(DASH));
+        List<String> flagArgs = correctArgWithNegativeNum(Arrays.asList(args.split(DASH)));
         flagArgs.stream()
             .filter(flagArg -> !flagArg.isEmpty())
             .map(flagArg -> flagArg.trim())
             .forEach(flagArg -> parseArg(flagArg));
+    }
+
+    /**
+     * 参数直接用"-"分割，负数也会被分割，因此需要纠正。若无需支持负数，可省略此步骤
+     * @param flagArgs
+     * @return
+     */
+    private List<String> correctArgWithNegativeNum(List<String> flagArgs) {
+        List<String> flagArgsAfterCorrect = Lists.newArrayList();
+        for (String flagArg : flagArgs) {
+            flagArgsAfterCorrect.add(flagArg);
+            if (flagArg.length() < 2) {
+                continue;
+            }
+            char ch = 0;
+            if ((((ch = flagArg.charAt(0)) - '0') | ('9' - ch)) >= 0) {
+                StringJoiner sj = new StringJoiner(DASH, EMPTY, EMPTY);
+                flagArgsAfterCorrect.stream().skip(flagArgsAfterCorrect.size() - 2).forEach(f -> sj.add(f));
+                flagArgsAfterCorrect = flagArgsAfterCorrect.subList(0, flagArgsAfterCorrect.size() - 2);
+                flagArgsAfterCorrect.add(sj.toString());
+            }
+        }
+        return flagArgsAfterCorrect;
     }
 
     private void parseArg(String flagArg) {
@@ -56,11 +85,15 @@ public class Args {
         }
         String flag = flagAndArg[0];
         String arg = flagAndArg.length == 1 ? null : flagAndArg[1];
-        flagParserMap.get(flag).setValue(arg);
+        try {
+            flagParserMap.get(flag).setValue(arg);
+        } catch (ArgsException e) {
+            throw new ArgsException(
+                String.format("Parse error(%s %s), Cause by: %s", flag, arg, e.getMessage()));
+        }
     }
 
     public <T> T get(String flag) {
         return flagParserMap.get(flag).getValue();
     }
-
 }

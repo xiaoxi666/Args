@@ -2,15 +2,15 @@ public class StringArgsParser<T> implements ArgsParser {
     private String value = "";
 
     @Override
-    public void setValue(String arg) {
+    public void setValue(String arg) throws ArgsException{
         if (arg == null) {
-            throw new ArgsException("Flag for String type: Miss value.");
+            throw new ArgsException(ArgsException.ErrorCode.MISS_VALUE);
         }
         this.value = arg;
     }
 
     @Override
     public String getValue() {
-        return this.value;
+        return value;
     }
 }

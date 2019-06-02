@@ -4,12 +4,15 @@ public class IntegerArgsParser<T> implements ArgsParser {
     @Override
     public void setValue(String arg) throws ArgsException{
         if (arg == null) {
-            throw new ArgsException("Flag for int type: Miss value.");
+            throw new ArgsException(ArgsException.ErrorCode.MISS_VALUE);
+        }
+        if (arg.startsWith("-")) {
+            throw new ArgsException(ArgsException.ErrorCode.INVALID_VALUE);
         }
         try {
             this.value = Integer.valueOf(arg);
         } catch (NumberFormatException e) {
-            throw new ArgsException("Flag for int type: Invalid value.");
+            throw new ArgsException(ArgsException.ErrorCode.INVALID_VALUE);
         }
     }
 

@@ -4,7 +4,7 @@ public class BooleanArgsParser implements ArgsParser {
     @Override
     public void setValue(String arg) throws ArgsException{
         if (arg != null) {
-            throw new ArgsException("Flag for boolean type: Explicit assignment is prohibited.");
+            throw new ArgsException(ArgsException.ErrorCode.EXPLICIT_ASSIGNMENT);
         }
         this.value = true;
     }
