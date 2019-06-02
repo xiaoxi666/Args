@@ -1,4 +1,4 @@
-public class IntegerArgsParser<T> implements ArgsParser {
+public class IntegerArgsParser implements ArgsParser {
     private Integer value = 0;
 
     @Override

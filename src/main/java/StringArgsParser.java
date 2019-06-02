@@ -1,4 +1,4 @@
-public class StringArgsParser<T> implements ArgsParser {
+public class StringArgsParser implements ArgsParser {
     private String value = "";
 
     @Override
