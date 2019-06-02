@@ -6,6 +6,7 @@ public class IntegerArgsParser implements ArgsParser {
         if (arg == null) {
             throw new ArgsException(ArgsException.ErrorCode.MISS_VALUE);
         }
+        // 不可以是负数
         if (arg.startsWith("-")) {
             throw new ArgsException(ArgsException.ErrorCode.INVALID_VALUE);
         }
